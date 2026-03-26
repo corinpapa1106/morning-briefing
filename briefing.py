@@ -19,12 +19,23 @@ def get_new_kakao_token():
 def send_kakao_message(message):
     access_token = get_new_kakao_token()
     url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
-    headers = {"Authorization": f"Bearer {access_token}"}
-    data = {
-        "template_object": f'{{"object_type":"text","text":{repr(message)},"link":{{"web_url":"https://www.google.com"}}}}'
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/x-www-form-urlencoded"
     }
+    import json
+    template = {
+        "object_type": "text",
+        "text": message[:400],
+        "link": {
+            "web_url": "https://www.google.com",
+            "mobile_web_url": "https://www.google.com"
+        }
+    }
+    data = {"template_object": json.dumps(template, ensure_ascii=False)}
     response = requests.post(url, headers=headers, data=data)
     print(f"카카오 전송 결과: {response.status_code}")
+    print(f"카카오 응답: {response.text}")
 
 def get_briefing():
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
