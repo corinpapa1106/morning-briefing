@@ -116,7 +116,30 @@ def get_briefing(today_kst, yesterday_us):
    - 제목과 간단한 기획 방향
 
 ---
-📌 오늘의 핵심 요약 (3줄로 작성)"""
+📌 오늘의 핵심 요약 (3줄로 작성)
+
+---
+[카카오톡 요약 시작]
+아래 형식을 정확히 지켜서 카카오톡 요약 메시지를 작성해주세요.
+반드시 **[카카오톡 요약 시작]** 과 **[카카오톡 요약 끝]** 사이에 작성하세요.
+
+📊 {today_kst} 모닝브리핑
+
+📈 미국장 ({yesterday_us} 마감)
+S&P500 (수치) (등락률) | 나스닥 (수치) (등락률) | 다우 (수치) (등락률)
+▶ (주요 뉴스 1줄 요약)
+
+🔵 Canton CC코인
+(가격) | (24시간 등락률) | (주요 이슈 1줄)
+
+🟡 LayerZero ZRO
+(가격) | (24시간 등락률) | (주요 이슈 1줄)
+
+📌 핵심 요약
+① (첫번째 핵심)
+② (두번째 핵심)
+③ (세번째 핵심)
+[카카오톡 요약 끝]"""
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
@@ -131,39 +154,6 @@ def get_briefing(today_kst, yesterday_us):
             full_text += block.text
 
     return full_text
-
-def extract_summary(full_briefing):
-    # 마크다운 기호 전체 제거
-    clean = re.sub(r'\*\*(.*?)\*\*', r'\1', full_briefing)
-    clean = re.sub(r'#{1,3}\s?', '', clean)
-    clean = re.sub(r'\|.*?\|', '', clean)
-    clean = re.sub(r'-{3,}', '---', clean)
-    clean = re.sub(r'\n{3,}', '\n\n', clean)
-
-    lines = clean.strip().split('\n')
-    summary_lines = []
-    in_summary = False
-
-    for line in lines:
-        if '핵심 요약' in line:
-            in_summary = True
-        if in_summary and line.strip():
-            summary_lines.append(line.strip())
-        if len(summary_lines) >= 6:
-            break
-
-    if summary_lines:
-        return '\n'.join(summary_lines)
-    else:
-        # 핵심 요약이 없으면 미국장 + CC + ZRO 핵심만 추출
-        result = []
-        for line in lines:
-            line = line.strip()
-            if line and not line.startswith('|') and not line.startswith('>'):
-                result.append(line)
-            if len(result) >= 12:
-                break
-        return '\n'.join(result)
 
 def main():
     now_kst = datetime.now(timezone.utc) + timedelta(hours=9)
