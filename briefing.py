@@ -36,6 +36,8 @@ def send_kakao_message(summary, detail_url):
         }
     }
     template_str = json.dumps(template, ensure_ascii=False)
+    print(f"전송할 URL: {detail_url}")
+    print(f"템플릿: {template_str}")
     body = urlencode({"template_object": template_str})
     response = requests.post(url, headers=headers, data=body.encode("utf-8"))
     print(f"카카오 전송 결과: {response.status_code}")
