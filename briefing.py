@@ -133,8 +133,14 @@ def get_briefing(today_kst, yesterday_us):
     return full_text
 
 def extract_summary(full_briefing):
-    # 별표 제거한 요약 추출
-    lines = full_briefing.strip().split('\n')
+    # 마크다운 기호 전체 제거
+    clean = re.sub(r'\*\*(.*?)\*\*', r'\1', full_briefing)
+    clean = re.sub(r'#{1,3}\s?', '', clean)
+    clean = re.sub(r'\|.*?\|', '', clean)
+    clean = re.sub(r'-{3,}', '---', clean)
+    clean = re.sub(r'\n{3,}', '\n\n', clean)
+
+    lines = clean.strip().split('\n')
     summary_lines = []
     in_summary = False
 
@@ -142,16 +148,22 @@ def extract_summary(full_briefing):
         if '핵심 요약' in line:
             in_summary = True
         if in_summary and line.strip():
-            clean = re.sub(r'\*\*(.*?)\*\*', r'\1', line)
-            summary_lines.append(clean)
+            summary_lines.append(line.strip())
         if len(summary_lines) >= 6:
             break
 
     if summary_lines:
         return '\n'.join(summary_lines)
     else:
-        clean = re.sub(r'\*\*(.*?)\*\*', r'\1', full_briefing[:400])
-        return clean + "\n\n👉 전체 내용은 자세히 보기를 눌러주세요!"
+        # 핵심 요약이 없으면 미국장 + CC + ZRO 핵심만 추출
+        result = []
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('|') and not line.startswith('>'):
+                result.append(line)
+            if len(result) >= 12:
+                break
+        return '\n'.join(result)
 
 def main():
     now_kst = datetime.now(timezone.utc) + timedelta(hours=9)
