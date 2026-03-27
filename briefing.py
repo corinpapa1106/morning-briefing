@@ -40,33 +40,32 @@ def send_kakao_message(summary, detail_url):
     print(f"카카오 응답: {response.text}")
 
 def save_html(full_briefing, today_kst):
-    # 마크다운 굵게(**텍스트**) 를 HTML로 변환
     import re
     content = full_briefing.replace('\n', '<br>')
     content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content)
 
-    html = f"""<!DOCTYPE html>
+    html = """<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>모닝 브리핑 {today_kst}</title>
+<title>모닝 브리핑 """ + today_kst + """</title>
 <style>
-  body {{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }}
-  .header {{ background: #1a1a2e; color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }}
-  .header h1 {{ margin: 0; font-size: 20px; }}
-  .header .date {{ margin: 4px 0 0; font-size: 13px; color: #aaa; }}
-  .card {{ background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); line-height: 1.8; font-size: 15px; }}
-  strong {{ color: #1a1a2e; }}
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }
+  .header { background: #1a1a2e; color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+  .header h1 { margin: 0; font-size: 20px; }
+  .date { margin: 4px 0 0; font-size: 13px; color: #aaa; }
+  .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); line-height: 1.8; font-size: 15px; }
+  strong { color: #1a1a2e; }
 </style>
 </head>
 <body>
 <div class="header">
   <h1>📊 모닝 브리핑</h1>
-  <p class="date">{today_kst} (한국시간 기준)</p>
+  <p class="date">""" + today_kst + """ (한국시간 기준)</p>
 </div>
 <div class="card">
-  {content}
+  """ + content + """
 </div>
 </body>
 </html>"""
@@ -74,7 +73,6 @@ def save_html(full_briefing, today_kst):
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
     print("index.html 저장 완료")
-
 def get_briefing(today_kst, yesterday_us):
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
