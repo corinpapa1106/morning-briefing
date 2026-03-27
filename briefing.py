@@ -1,7 +1,9 @@
 import anthropic
 import requests
 import os
+import re
 import json
+import subprocess
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
@@ -40,39 +42,54 @@ def send_kakao_message(summary, detail_url):
     print(f"카카오 응답: {response.text}")
 
 def save_html(full_briefing, today_kst):
-    import re
     content = full_briefing.replace('\n', '<br>')
     content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content)
 
-    html = """<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>모닝 브리핑 """ + today_kst + """</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }
-  .header { background: #1a1a2e; color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
-  .header h1 { margin: 0; font-size: 20px; }
-  .date { margin: 4px 0 0; font-size: 13px; color: #aaa; }
-  .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); line-height: 1.8; font-size: 15px; }
-  strong { color: #1a1a2e; }
-</style>
-</head>
-<body>
-<div class="header">
-  <h1>📊 모닝 브리핑</h1>
-  <p class="date">""" + today_kst + """ (한국시간 기준)</p>
-</div>
-<div class="card">
-  """ + content + """
-</div>
-</body>
-</html>"""
+    html = "<!DOCTYPE html>\n"
+    html += "<html lang='ko'>\n"
+    html += "<head>\n"
+    html += "<meta charset='UTF-8'>\n"
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"
+    html += "<title>모닝 브리핑 " + today_kst + "</title>\n"
+    html += "<style>\n"
+    html += "body { font-family: -apple-system, sans-serif; max-width: 720px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }\n"
+    html += ".header { background: #1a1a2e; color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }\n"
+    html += ".header h1 { margin: 0; font-size: 20px; }\n"
+    html += ".date { margin: 4px 0 0; font-size: 13px; color: #aaa; }\n"
+    html += ".card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); line-height: 1.8; font-size: 15px; }\n"
+    html += "strong { color: #1a1a2e; }\n"
+    html += "</style>\n"
+    html += "</head>\n"
+    html += "<body>\n"
+    html += "<div class='header'>\n"
+    html += "<h1>📊 모닝 브리핑</h1>\n"
+    html += "<p class='date'>" + today_kst + " (한국시간 기준)</p>\n"
+    html += "</div>\n"
+    html += "<div class='card'>\n"
+    html += content + "\n"
+    html += "</div>\n"
+    html += "</body>\n"
+    html += "</html>"
 
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
     print("index.html 저장 완료")
+
+    # git push
+    try:
+        subprocess.run(["git", "config", "--global", "user.email", "action@github.com"], check=True)
+        subprocess.run(["git", "config", "--global", "user.name", "GitHub Action"], check=True)
+        subprocess.run(["git", "add", "index.html"], check=True)
+        result = subprocess.run(["git", "diff", "--staged", "--quiet"])
+        if result.returncode != 0:
+            subprocess.run(["git", "commit", "-m", "브리핑 업데이트 " + today_kst], check=True)
+            subprocess.run(["git", "push"], check=True)
+            print("GitHub 페이지 업데이트 완료")
+        else:
+            print("변경사항 없음")
+    except Exception as e:
+        print(f"git push 오류: {e}")
+
 def get_briefing(today_kst, yesterday_us):
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
@@ -80,25 +97,24 @@ def get_briefing(today_kst, yesterday_us):
 
 아래 내용을 검색해서 한국어로 브리핑해주세요.
 
-1. 📈 미국 주식시장 {yesterday_us} 마감 시황
+1. 미국 주식시장 {yesterday_us} 마감 시황
    - S&P500, 나스닥, 다우존스 수치와 등락률
    - 주요 뉴스 3가지
 
-2. 🔵 Canton Network (CC코인) 최신 동향
+2. Canton Network CC코인 최신 동향
    - 현재 가격과 24시간 변동
-   - 주요 이슈 (새로운 소식 위주)
+   - 주요 이슈
 
-3. 🟡 LayerZero (ZRO코인) 최신 동향
+3. LayerZero ZRO코인 최신 동향
    - 현재 가격과 24시간 변동
-   - 주요 이슈 (새로운 소식 위주)
+   - 주요 이슈
 
-4. 🎬 오늘의 유튜브 주제 추천
+4. 오늘의 유튜브 주제 추천
    - 30~50대 남성 투자자 대상
-   - 제목 + 간단한 기획 방향
+   - 제목과 간단한 기획 방향
 
 ---
-📌 오늘의 핵심 요약 (3줄)
-위 내용을 3줄로 요약해주세요."""
+📌 오늘의 핵심 요약 (3줄로 작성)"""
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
@@ -115,6 +131,7 @@ def get_briefing(today_kst, yesterday_us):
     return full_text
 
 def extract_summary(full_briefing):
+    # 별표 제거한 요약 추출
     lines = full_briefing.strip().split('\n')
     summary_lines = []
     in_summary = False
@@ -123,19 +140,21 @@ def extract_summary(full_briefing):
         if '핵심 요약' in line:
             in_summary = True
         if in_summary and line.strip():
-            summary_lines.append(line)
+            clean = re.sub(r'\*\*(.*?)\*\*', r'\1', line)
+            summary_lines.append(clean)
         if len(summary_lines) >= 6:
             break
 
     if summary_lines:
         return '\n'.join(summary_lines)
     else:
-        return full_briefing[:400] + "\n\n👉 전체 내용은 자세히 보기를 눌러주세요!"
+        clean = re.sub(r'\*\*(.*?)\*\*', r'\1', full_briefing[:400])
+        return clean + "\n\n👉 전체 내용은 자세히 보기를 눌러주세요!"
 
 def main():
     now_kst = datetime.now(timezone.utc) + timedelta(hours=9)
-today_kst = now_kst.strftime("%Y년 %m월 %d일")
-yesterday_us = (now_kst - timedelta(days=1)).strftime("%Y년 %m월 %d일")
+    today_kst = now_kst.strftime("%Y년 %m월 %d일")
+    yesterday_us = (now_kst - timedelta(days=1)).strftime("%Y년 %m월 %d일")
 
     print(f"한국시간: {today_kst}")
     print(f"미국장 기준일: {yesterday_us}")
