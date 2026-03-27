@@ -32,11 +32,3 @@ jobs:
         KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
         KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
       run: python briefing.py
-
-    - name: HTML 파일 GitHub에 저장
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git add index.html
-        git diff --staged --quiet || git commit -m "브리핑 업데이트 $(date '+%Y-%m-%d')"
-        git push
