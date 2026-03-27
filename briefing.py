@@ -5,9 +5,6 @@ import json
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
-# 한국시간 설정
-KST = timezone(timedelta(hours=9))
-
 def get_new_kakao_token():
     refresh_token = os.environ.get("KAKAO_REFRESH_TOKEN")
     rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
@@ -138,9 +135,9 @@ def extract_summary(full_briefing):
         return full_briefing[:400] + "\n\n👉 전체 내용은 자세히 보기를 눌러주세요!"
 
 def main():
-    now_kst = datetime.now(KST)
-    today_kst = now_kst.strftime("%Y년 %m월 %d일")
-    yesterday_us = (now_kst - timedelta(days=1)).strftime("%Y년 %m월 %d일")
+    now_kst = datetime.now(timezone.utc) + timedelta(hours=9)
+today_kst = now_kst.strftime("%Y년 %m월 %d일")
+yesterday_us = (now_kst - timedelta(days=1)).strftime("%Y년 %m월 %d일")
 
     print(f"한국시간: {today_kst}")
     print(f"미국장 기준일: {yesterday_us}")
