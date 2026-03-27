@@ -154,6 +154,17 @@ S&P500 (수치) (등락률) | 나스닥 (수치) (등락률) | 다우 (수치) (
             full_text += block.text
 
     return full_text
+    
+def extract_summary(full_briefing):
+    match = re.search(r'\[카카오톡 요약 시작\](.*?)\[카카오톡 요약 끝\]', full_briefing, re.DOTALL)
+    if match:
+        summary = match.group(1).strip()
+        summary = re.sub(r'\*\*(.*?)\*\*', r'\1', summary)
+        return summary
+    else:
+        clean = re.sub(r'\*\*(.*?)\*\*', r'\1', full_briefing[:500])
+        clean = re.sub(r'#{1,3}\s?', '', clean)
+        return clean
 
 def main():
     now_kst = datetime.now(timezone.utc) + timedelta(hours=9)
@@ -170,7 +181,7 @@ def main():
     save_html(full_briefing, today_kst)
 
     summary = extract_summary(full_briefing)
-    summary += f"\n\n📅 {today_kst} 모닝브리핑\n👇 전체 내용 보기"
+    summary += "\n\n👇 전체 내용 보기"
 
     detail_url = "https://corinpapa1106.github.io/morning-briefing/"
     send_kakao_message(summary, detail_url)
