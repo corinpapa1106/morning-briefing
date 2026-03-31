@@ -103,13 +103,17 @@ def get_briefing(today_kst, yesterday_us):
    - S&P500, 나스닥, 다우존스 수치와 등락률
    - 주요 뉴스 3가지
 
-2. Canton Network CC코인 최신 동향
-   - 현재 가격과 24시간 변동
-   - 주요 이슈
+2. Canton Network CC코인 실시간 현황 (지금 이 순간 기준)
+   - 지금 현재 실시간 가격 (CoinMarketCap 또는 CoinGecko 기준)
+   - 24시간 등락률
+   - 시가총액 및 거래량
+   - 최근 24시간 주요 이슈
 
-3. LayerZero ZRO코인 최신 동향
-   - 현재 가격과 24시간 변동
-   - 주요 이슈
+3. LayerZero ZRO코인 실시간 현황 (지금 이 순간 기준)
+   - 지금 현재 실시간 가격 (CoinMarketCap 또는 CoinGecko 기준)
+   - 24시간 등락률
+   - 시가총액 및 거래량
+   - 최근 24시간 주요 이슈
 
 4. 오늘의 유튜브 주제 추천
    - 30~50대 남성 투자자 대상
@@ -129,11 +133,11 @@ def get_briefing(today_kst, yesterday_us):
 S&P500 (수치) (등락률) | 나스닥 (수치) (등락률) | 다우 (수치) (등락률)
 ▶ (주요 뉴스 1줄 요약)
 
-🔵 Canton CC코인
-(가격) | (24시간 등락률) | (주요 이슈 1줄)
+🔵 Canton CC코인 (실시간)
+현재가 (가격) | 24h (등락률) | (주요 이슈 1줄)
 
-🟡 LayerZero ZRO
-(가격) | (24시간 등락률) | (주요 이슈 1줄)
+🟡 LayerZero ZRO (실시간)
+현재가 (가격) | 24h (등락률) | (주요 이슈 1줄)
 
 📌 핵심 요약
 ① (첫번째 핵심)
